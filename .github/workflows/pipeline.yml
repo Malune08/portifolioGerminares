@@ -254,8 +254,8 @@ jobs:
           lines.append(f"- Falhas: {len(failures)}")
           if failures:
               lines.extend(["", "### Falhas encontradas", *[f"- {item}" for item in failures]])
-          results_file.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
-          Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8").write(f"failures={len(failures)}\\n")
+          results_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8").write(f"failures={len(failures)}\n")
           PY
 
           cat "$RESULTS_FILE" >> "$GITHUB_STEP_SUMMARY"
