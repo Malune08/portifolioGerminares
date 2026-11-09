@@ -1,0 +1,165 @@
+*{
+    margin: 0;
+    padding: 0;
+    /* border: solid 1px black; */
+}
+
+/* Configurações Gerais */
+html {
+    scroll-behavior: smooth;
+}
+
+hr{
+    width: 80vw;
+    justify-self: center;
+    margin: 10vh;
+}
+
+#firstHr{
+    margin-top: 45vh;
+}
+
+body{
+    background-color: #2d2a2a;
+}
+
+a{
+    text-decoration: none;
+    color: inherit;
+}
+
+body{
+    color: #b4b4b4;
+}
+
+li{
+    margin: 2vh;
+    font-size: 1.2rem;
+}
+
+#link:active{
+    color: brown;
+}
+
+/* Estilizando header */
+header{
+    display: flex;
+    justify-content: center;
+
+    position: sticky;
+    top: 0;
+}
+
+header > nav {
+    background-color: #1B1B1B;
+    padding: 2vh 2vw;
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    width: 87vw;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.ulHeader{
+    list-style-type: none;
+    display: flex;
+
+    gap: 0 20%;
+
+    text-align: center;
+    align-items: center;
+}
+
+#linksHeader{
+    display: flex;
+    gap: 30%;
+}
+.imgIcoHeader{
+    height: 3vh;
+    width: auto;
+}
+
+/* Editando a main */
+main{
+    display: flex;
+    justify-content: space-evenly;
+
+    padding-top: 10vh;
+    padding-bottom: 2.5vh;
+    padding-left: 2.5vw;
+    padding-right: 2.5vw;
+}
+
+#divIntro{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    width: 40vw;
+    text-align: justify;
+
+    gap: 3vh;
+}
+
+#textoIntro{
+    width: 30vw;
+    font-size: 1.2rem;
+}
+
+#buttonIntro{
+    background-color: #00C97A;
+    border: none;
+    color: white;
+
+    padding: 5%;
+
+    width: 20vw;
+
+    box-shadow: 0 0 25px rgba(99, 187, 27, 0.7);
+    border-radius: 5px;
+
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+#buttonIntro:hover{
+    cursor: pointer;
+    box-shadow: 0 0 25px rgba(69, 132, 19, 0.4);
+}
+
+#fotoIntro{
+    width: 20vw;
+    height: 20vw;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* estilizando worked with */
+#fundoWorkedWith{
+    display: flex;
+}
+
+/* estilizando as infos */
+.info{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.listaInfo{
+    width: 32vw;
+}
+
+.imgInfo{
+    width: 30vw;
+}
+
+footer{
+    margin-top: 3%;
+    
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}

@@ -1,0 +1,333 @@
+:root {
+    --primary-color: #E2B617;
+    --secondary-color: #191717;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom right, #191717, #4B3F17, #E2B617);
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100dvh;
+    max-width: 100dvw;
+}
+
+/* Header */
+header {
+    top: 0;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    padding: 20px 40px;
+    background-color: var(--primary-color);
+    z-index: 1000;
+}
+
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 6rem;
+    margin: 0;
+    padding: 0 20px;
+}
+
+.nav-links li a {
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.logo img {
+    height: 3rem;
+}
+
+/* final-header */
+
+/* Main Section */
+main {
+    display: flex;
+    flex-direction: column;
+}
+
+main hr {
+    border: none;
+    height: 1.4px;
+    background-color: var(--primary-color);
+    margin: 5rem 2rem;
+}
+
+.about-section {
+    display: flex;
+    /* align-items: center; */
+    justify-content: center;
+    flex-direction: column;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.about-section>h1 {
+    color: var(--primary-color);
+    margin-left: 20px;
+}
+
+/* Sobre */
+.card-lateral {
+    width: 50%;
+    background: var(--primary-color);
+    border-radius: 0 12rem 12rem 0;
+    padding: 2rem 10rem 2rem 4rem;
+    color: var(--secondary-color);
+}
+
+/* pessoas */
+.pessoa {
+    display: flex;
+    flex-direction: column;
+    margin: 6rem 2rem;
+}
+
+/* Card-pessoal */
+.card-pessoal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--primary-color);
+    border-radius: 2rem;
+    padding: 1rem 2rem;
+    gap: 2rem;
+    color: var(--primary-color);
+}
+
+.pessoa>h1 {
+    width: 100%;
+    font-size: 2.6rem;
+    color: var(--primary-color);
+}
+
+.info-pessoal {
+    box-sizing: border-box;
+    width: 70%;
+    padding: 0 2rem;
+}
+
+.img-pessoa {
+    height: 28rem;
+    width: 18rem;
+    border-radius: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+}
+
+/* final-card-pessoal */
+
+/* Sec-curiosidades */
+.curiosidades {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+.curiosidades h2 {
+    font-size: 2rem;
+    width: 100%;
+    color: var(--primary-color);
+}
+
+
+.container-curiosidades {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    width: 80%;
+    list-style: none;
+}
+
+.card-curiosidade {
+    background: var(--secondary-color);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 2rem;
+    padding: 2rem;
+    height: 12rem;
+    width: 10rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+}
+
+.card-curiosidade:hover {
+    transform: scale(1.2);
+}
+
+
+/* final Sec-curiosidades */
+
+/* Lugares que já visitei */
+.lugares-true {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+.lugares-true h2 {
+    font-size: 2rem;
+    width: 100%;
+    color: var(--primary-color);
+}
+
+.lugares-true ol {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    list-style: none;
+    list-style-position: inside;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 0;
+}
+
+.card-lugar {
+    position: relative;
+    box-sizing: border-box;
+    height: 10rem;
+    width: 10rem;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: 0.3s ease;
+}
+
+.card-lugar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-lugar .lugar-nome {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    text-align: left;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-lugar:hover .lugar-nome {
+    opacity: 1;
+}
+
+.card-lugar:hover {
+    transform: scale(1.25);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+/* final Lugares que já visitei */
+
+/* quero visitar */
+.lugares-false {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+.lugares-false h2 {
+    font-size: 2rem;
+    width: 100%;
+    color: var(--primary-color);
+}
+
+.lugares-false ul {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    list-style-position: inside;
+    gap: 20px;
+    padding: 0;
+}
+
+.card-lugarF {
+    position: relative;
+    box-sizing: border-box;
+    height: 10rem;
+    width: 50rem;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: 0.3s ease;
+}
+
+.card-lugarF img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    object-position: center 60%;
+}
+
+.card-lugarF .lugar-nome {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    font-size: 1.2rem;
+    text-align: left;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-lugarF:hover .lugar-nome {
+    opacity: 1;
+}
+
+.card-lugarF:hover {
+    transform: scale(1.2);
+}
+
+/* final quero visitar */
+/* final Main Section */
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    margin: 0;
+    height: 40px;
+}

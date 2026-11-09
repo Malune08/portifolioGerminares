@@ -1,0 +1,80 @@
+body {
+  background-color: #000;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+main {
+  width: 100%;
+  background-color: #111;
+  min-height: 100vh;
+}
+
+header {
+  background-color: #e50914;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+header button {
+  background-color: white;
+  color: #e50914;
+  border: none;
+  padding: 8px 20px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+header button:hover {
+  background-color: #f2f2f2;
+}
+
+section {
+  padding: 40px;
+  background-color: #141414;
+}
+
+h3 {
+  color: #e50914;
+  font-size: 1.2rem;
+}
+
+p, li {
+  font-size: 1rem;
+  color: #fff;
+}
+
+strong {
+  color: #e50914;
+}
+
+.btnHeader {
+    background-color:white;
+    color: #E50914;
+    padding: 10px 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-right: 125px;
+}
+
+.btnHeader:hover {
+    background-color: #f05058;
+    transform: scale(1.05);
+}
+
+.imagem{
+  height: 500px;
+}

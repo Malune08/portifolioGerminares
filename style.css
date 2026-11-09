@@ -1,0 +1,158 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: poppins, sans-serif;
+}
+
+body{
+    background-color: #FFF1F1;
+}
+
+header{
+    display: flex;
+    justify-content: space-around;
+    padding: 30px;
+    background-color: white;
+}
+
+#logo{
+    position: absolute;
+    right: 90%;
+    top: 0.5%;
+}
+
+ul{
+    display: flex;
+    list-style-type: none;
+    width: 78.5vw;
+    column-gap: 4.5vw;
+    text-align: center;
+    align-items: center;
+    /* font-size: 1em; */
+    justify-content: space-around;
+}
+
+li{
+    text-decoration: none;
+}
+
+a{
+    color: black;
+    text-decoration: none;
+    transition: 150ms ease-in-out;
+}
+
+
+
+#linkMyMelody{
+    position: relative;
+}
+
+#linkMyMelody:hover{
+    color: #FFB9D7;
+    transition: 150ms ease-in-out;
+}
+
+#linkPompompurin{
+    position: relative;
+}
+
+#linkPompompurin:hover{
+    color: #9d4e1e;
+    transition: 150ms ease-in-out;
+}
+
+#linkBadzMaru:hover{
+    color: #eaed2a;
+    transition: 150ms ease-in-out;
+}
+
+#linkChocoCat:hover{
+    color: rgb(71, 136, 222);
+    transition: 150ms ease-in-out;
+}
+
+
+/* colocando cada personagem no lugart */
+
+#divCentral{
+    display: flex;
+    justify-content: space-around;
+    column-gap: 6vw;
+}
+
+#hubAnimais{
+    width: 80vw;
+    display: flex;
+    justify-self: center;
+    justify-content: center;
+    margin-top: 10vh;
+}
+
+/* editando cada personagem */
+#divCentral > div {
+    height: 60vh;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 5vh;
+    width: 15vw;
+    justify-content: center;
+}
+
+#div-choco-cat{
+    background-color: white;
+    border-radius: 15px;
+    transition: 150ms ease-in-out;
+}
+
+#div-choco-cat:hover{
+    transition: 150ms ease-in-out;
+    transform: scale(1.1);
+}
+
+#div-my-melody:hover{
+    transition: 150ms ease-in-out;
+    transform: scale(1.1);
+}
+
+#div-my-melody{
+    background-color: #FFB9D7;
+    border-radius: 15px;
+    transition: 150ms ease-in-out;
+}
+
+#div-pompompurin:hover{
+    transition: 150ms ease-in-out;
+    transform: scale(1.1);
+    
+}
+
+#div-pompompurin{
+    background-color: #FFF777;
+     border-radius: 15px;
+     transition: 150ms ease-in-out;
+}
+
+#div-badz-maru:hover{
+    transition: 150ms ease-in-out;
+    transform: scale(1.1);
+}
+
+#div-badz-maru{
+    transition: 150ms ease-in-out;
+    background-color: #434343;
+     border-radius: 15px;
+}
+
+/* estilizando footer */
+
+footer{
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 0;
+    width: 100vw;
+    box-sizing: border-box;
+    padding: 1.2vh;
+}
