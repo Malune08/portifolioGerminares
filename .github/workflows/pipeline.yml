@@ -1,0 +1,295 @@
+name: Validar e publicar portfólios
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI - validar alterações
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório e histórico
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Descobrir arquivos modificados
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --name-only "origin/${{ github.base_ref }}"...HEAD > "$RUNNER_TEMP/changed-files.txt"
+            git diff --diff-filter=D --name-only "origin/${{ github.base_ref }}"...HEAD > "$RUNNER_TEMP/deleted-files.txt"
+          elif [[ "${{ github.event.before }}" =~ ^0+$ ]]; then
+            git diff-tree --no-commit-id --name-only -r HEAD > "$RUNNER_TEMP/changed-files.txt"
+            : > "$RUNNER_TEMP/deleted-files.txt"
+          else
+            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" > "$RUNNER_TEMP/changed-files.txt"
+            git diff --diff-filter=D --name-only "${{ github.event.before }}" "${{ github.sha }}" > "$RUNNER_TEMP/deleted-files.txt"
+          fi
+
+          echo "total=$(wc -l < "$RUNNER_TEMP/changed-files.txt" | tr -d ' ')" >> "$GITHUB_OUTPUT"
+
+      - name: Validar HTML, CSS, imagens e referências
+        id: validate
+        shell: bash
+        env:
+          CHANGED_FILES: ${{ runner.temp }}/changed-files.txt
+          DELETED_FILES: ${{ runner.temp }}/deleted-files.txt
+          RESULTS_FILE: ${{ runner.temp }}/validation-results.md
+          SITE_ROOT: portifolioGerminares
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import html.parser
+          import os
+          import posixpath
+          import re
+          import sys
+          import urllib.parse
+          import xml.etree.ElementTree as ET
+          from collections import defaultdict
+          from pathlib import Path
+
+          site_root = Path(os.environ["SITE_ROOT"])
+          changed_file = Path(os.environ["CHANGED_FILES"])
+          deleted_file = Path(os.environ["DELETED_FILES"])
+          results_file = Path(os.environ["RESULTS_FILE"])
+          image_extensions = {".avif", ".bmp", ".gif", ".ico", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
+          ignored_schemes = {"data", "http", "https", "mailto", "tel", "javascript"}
+          void_elements = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+          failures = []
+          passed = []
+
+          def read_paths(path):
+              return [item.strip() for item in path.read_text(encoding="utf-8").splitlines() if item.strip()] if path.exists() else []
+
+          changed_paths = read_paths(changed_file)
+          deleted_paths = set(read_paths(deleted_file))
+          existing_paths = [Path(item) for item in changed_paths if item not in deleted_paths and Path(item).is_file()]
+
+          def portfolio_name(path):
+              parts = path.parts
+              if len(parts) < 2 or parts[0] != site_root.name or len(parts) == 2:
+                  return "página inicial / recursos compartilhados"
+              return parts[1]
+
+          groups = defaultdict(lambda: defaultdict(list))
+          for path_text in changed_paths:
+              path = Path(path_text)
+              kind = "excluído" if path_text in deleted_paths else (path.suffix.lower().lstrip(".") or "sem extensão")
+              groups[portfolio_name(path)][kind].append(path_text)
+
+          print("## Arquivos alterados")
+          if not changed_paths:
+              print("Nenhum arquivo alterado.")
+          for portfolio, types in sorted(groups.items()):
+              summary = ", ".join(f"{kind}: {len(files)}" for kind, files in sorted(types.items()))
+              print(f"- **{portfolio}** — {summary}")
+
+          def record(ok, label, detail=""):
+              message = f"{label}{': ' + detail if detail else ''}"
+              (passed if ok else failures).append(message)
+              print(("OK" if ok else "ERRO") + " — " + message)
+
+          class MarkupChecker(html.parser.HTMLParser):
+              def __init__(self):
+                  super().__init__(convert_charrefs=True)
+                  self.stack = []
+                  self.references = []
+
+              def handle_starttag(self, tag, attrs):
+                  if tag not in void_elements:
+                      self.stack.append(tag)
+                  for name, value in attrs:
+                      if value and name.lower() in {"src", "href", "poster", "srcset"}:
+                          if name.lower() == "srcset":
+                              self.references.extend(part.strip().split()[0] for part in value.split(",") if part.strip())
+                          else:
+                              self.references.append(value)
+
+              def handle_startendtag(self, tag, attrs):
+                  for name, value in attrs:
+                      if value and name.lower() in {"src", "href", "poster"}:
+                          self.references.append(value)
+
+              def handle_endtag(self, tag):
+                  if tag in void_elements:
+                      return
+                  if not self.stack:
+                      raise ValueError(f"</{tag}> sem abertura")
+                  if self.stack[-1] != tag:
+                      raise ValueError(f"</{tag}> fecha <{self.stack[-1]}>")
+                  self.stack.pop()
+
+              def finish(self):
+                  if self.stack:
+                      raise ValueError("tags sem fechamento: " + ", ".join(self.stack))
+
+          def check_html(path):
+              try:
+                  checker = MarkupChecker()
+                  checker.feed(path.read_text(encoding="utf-8"))
+                  checker.close()
+                  checker.finish()
+                  record(True, str(path), "HTML bem formado")
+              except Exception as error:
+                  record(False, str(path), f"HTML inválido ({error})")
+
+          def check_css(path):
+              try:
+                  text = path.read_text(encoding="utf-8")
+                  if text.count("/*") != text.count("*/"):
+                      raise ValueError("comentário sem fechamento")
+                  clean = re.sub(r"/\\*.*?\\*/", "", text, flags=re.S)
+                  clean = re.sub(r"(['\"]).*?\\1", "", clean, flags=re.S)
+                  level = 0
+                  for character in clean:
+                      if character == "{":
+                          level += 1
+                      elif character == "}":
+                          level -= 1
+                          if level < 0:
+                              raise ValueError("chave '}' sem abertura")
+                  if level:
+                      raise ValueError("chave '{' sem fechamento")
+                  record(True, str(path), "CSS com blocos balanceados")
+              except Exception as error:
+                  record(False, str(path), f"CSS inválido ({error})")
+
+          def check_image(path):
+              try:
+                  data = path.read_bytes()[:64]
+                  suffix = path.suffix.lower()
+                  valid = {
+                      ".jpg": data.startswith(b"\\xff\\xd8\\xff"),
+                      ".jpeg": data.startswith(b"\\xff\\xd8\\xff"),
+                      ".png": data.startswith(b"\\x89PNG\\r\\n\\x1a\\n"),
+                      ".gif": data.startswith((b"GIF87a", b"GIF89a")),
+                      ".webp": data.startswith(b"RIFF") and data[8:12] == b"WEBP",
+                      ".bmp": data.startswith(b"BM"),
+                      ".ico": data.startswith(b"\\x00\\x00\\x01\\x00"),
+                      ".avif": b"ftypavif" in data or b"ftypavis" in data,
+                  }
+                  if suffix == ".svg":
+                      ET.parse(path)
+                      valid_image = True
+                  elif suffix in valid:
+                      valid_image = valid[suffix]
+                  else:
+                      return
+                  if not valid_image:
+                      raise ValueError("assinatura do arquivo não corresponde à extensão")
+                  record(True, str(path), "imagem íntegra")
+              except Exception as error:
+                  record(False, str(path), f"imagem inválida ({error})")
+
+          def local_target(reference, source):
+              reference = reference.strip()
+              if not reference or reference.startswith("#"):
+                  return None
+              parsed = urllib.parse.urlsplit(reference)
+              if parsed.scheme.lower() in ignored_schemes or parsed.netloc:
+                  return None
+              path_text = urllib.parse.unquote(parsed.path)
+              if not path_text:
+                  return None
+              if path_text.startswith("/"):
+                  target = site_root / path_text.lstrip("/")
+              else:
+                  target = source.parent / path_text
+              return Path(posixpath.normpath(str(target).replace("\\\\", "/")))
+
+          def references_in_html(path):
+              checker = MarkupChecker()
+              checker.feed(path.read_text(encoding="utf-8"))
+              return checker.references
+
+          def references_in_css(path):
+              text = path.read_text(encoding="utf-8")
+              return [match.group(1).strip().strip("'\\\"") for match in re.finditer(r"url\\(\\s*([^)]*?)\\s*\\)", text, re.I)]
+
+          def check_references(path):
+              try:
+                  references = references_in_html(path) if path.suffix.lower() in {".html", ".htm"} else references_in_css(path)
+                  missing = []
+                  for reference in references:
+                      target = local_target(reference, path)
+                      if target is not None and not target.exists():
+                          missing.append(f"{reference} -> {target}")
+                  if missing:
+                      record(False, str(path), "referência inexistente: " + "; ".join(missing))
+                  else:
+                      record(True, str(path), "referências locais encontradas")
+              except Exception as error:
+                  record(False, str(path), f"não foi possível verificar referências ({error})")
+
+          for path in existing_paths:
+              suffix = path.suffix.lower()
+              if suffix in {".html", ".htm"}:
+                  check_html(path)
+              elif suffix == ".css":
+                  check_css(path)
+              elif suffix in image_extensions:
+                  check_image(path)
+
+          # Mudanças ou exclusões de imagens podem afetar qualquer página que as use.
+          # Por isso as referências de todo o site são verificadas ao final, sem interromper as outras validações.
+          if site_root.exists():
+              for path in sorted(site_root.rglob("*")):
+                  if path.is_file() and path.suffix.lower() in {".html", ".htm", ".css"}:
+                      check_references(path)
+
+          lines = ["## Resultado da validação", ""]
+          lines.append(f"- Arquivos alterados: {len(changed_paths)}")
+          lines.append(f"- Verificações aprovadas: {len(passed)}")
+          lines.append(f"- Falhas: {len(failures)}")
+          if failures:
+              lines.extend(["", "### Falhas encontradas", *[f"- {item}" for item in failures]])
+          results_file.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+          Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8").write(f"failures={len(failures)}\\n")
+          PY
+
+          cat "$RESULTS_FILE" >> "$GITHUB_STEP_SUMMARY"
+          failure_count="$(sed -n 's/^- Falhas: //p' "$RESULTS_FILE")"
+          if [[ "$failure_count" != "0" ]]; then
+            echo "A validação terminou com falhas; todos os arquivos foram analisados antes de encerrar."
+            exit 1
+          fi
+
+  cd:
+    name: CD - publicar no GitHub Pages
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Baixar site aprovado
+        uses: actions/checkout@v4
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar artefato do site estático
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: portifolioGerminares
+
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
