@@ -45,7 +45,7 @@ jobs:
           CHANGED_FILES: ${{ runner.temp }}/changed-files.txt
           DELETED_FILES: ${{ runner.temp }}/deleted-files.txt
           RESULTS_FILE: ${{ runner.temp }}/validation-results.md
-          SITE_ROOT: portifolioGerminares
+          SITE_ROOT: .
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -77,10 +77,10 @@ jobs:
           existing_paths = [Path(item) for item in changed_paths if item not in deleted_paths and Path(item).is_file()]
 
           def portfolio_name(path):
-              parts = path.parts
-              if len(parts) < 2 or parts[0] != site_root.name or len(parts) == 2:
+              parts = path.relative_to(site_root).parts
+              if len(parts) < 2:
                   return "página inicial / recursos compartilhados"
-              return parts[1]
+              return parts[0]
 
           groups = defaultdict(lambda: defaultdict(list))
           for path_text in changed_paths:
@@ -288,7 +288,7 @@ jobs:
       - name: Preparar artefato do site estático
         uses: actions/upload-pages-artifact@v3
         with:
-          path: portifolioGerminares
+          path: .
 
       - name: Publicar no GitHub Pages
         id: deployment
